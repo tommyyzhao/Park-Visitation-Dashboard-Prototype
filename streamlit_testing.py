@@ -6,17 +6,38 @@ import urllib
 
 st.title("Park Visitation Sample Data Mapping")
 
-@st.cache
-def from_data_file(filename):
-    url = (
-        "https://raw.githubusercontent.com/streamlit/"
-        "example-data/master/hello/v1/%s" % filename)
-    return pd.read_json(url)
+PARK_DATA = ('https://raw.githubusercontent.com/ztoms/Park-Visitation-Dashboard/main/data/parks_poi-part1.csv')
+PARK_PATTERNS_DATA = "https://raw.githubusercontent.com/ztoms/Park-Visitation-Dashboard/main/data/parks_patterns-part1.csv"
 
-PARK_DATA = ('https://raw.githubusercontent.com/ztoms/ztoms.github.io/master/parks_poi-part1.csv')
-PARK_PATTERNS_DATA = "https://raw.githubusercontent.com/ztoms/ztoms.github.io/master/parks_patterns-part1.csv"
+@st.cache
+def park_patterns_df():
+    return pd.read_csv(PARK_PATTERNS_DATA)
+
+@st.cache
+def park_poi_df():
+    return pd.read_csv(PARK_DATA).set_index('location_name')
+
+
+poi_df = park_poi_df()
 
 try:
+    parks = st.multiselect("Choose park", list(poi_df.index))
+
+    st.sidebar.markdown('### Time Filters')
+    year = st.sidebar.selectbox('Year', ["2018","2019","2020"])
+    type = st.sidebar.selectbox('Type', ["By Week","By Month"])
+    time_range = st.sidebar.slider('Time Range', min_value=0, max_value=50)
+
+    data = pd.read_csv(PARK_PATTERNS_DATA)
+
+    #data['date_range_start'] = data['date_range_start'].astype('|S')
+    #data.dtypes
+
+    selected_year = data[data['date_range_start'].str.contains(year)]
+    #st.line_chart(data)
+
+    data = data[['date_range_start', 'lng', 'lat', 'raw_visitor_counts']]
+
     ALL_LAYERS = {
         "Park Locations": pdk.Layer(
             "ScatterplotLayer",
@@ -44,18 +65,18 @@ try:
             get_alignment_baseline="'bottom'",
         )
     }
-    
+
     st.sidebar.markdown('### Map Layers')
-    
-    
+
+
     selected_layers = []
-    
+
     for layer_name, layer in ALL_LAYERS.items():
         if st.sidebar.checkbox(layer_name, True):
             if layer_name == "Park Names":
                 pass
             selected_layers.append(layer)
-    
+
     if selected_layers:
         st.pydeck_chart(pdk.Deck(
             map_style="mapbox://styles/mapbox/light-v9",
@@ -65,9 +86,9 @@ try:
         ))
     else:
         st.error("Please choose at least one layer above.")
+        
 except urllib.error.URLError as e:
     st.error("""
         **This demo requires internet access.**
-
         Connection error: %s
-    """ % e.reason) 
+    """ % e.reason)
