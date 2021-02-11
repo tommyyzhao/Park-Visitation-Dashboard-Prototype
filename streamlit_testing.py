@@ -6,17 +6,22 @@ import urllib
 
 st.title("Park Visitation Sample Data Mapping")
 
-@st.cache
-def from_data_file(filename):
-    url = (
-        "https://raw.githubusercontent.com/streamlit/"
-        "example-data/master/hello/v1/%s" % filename)
-    return pd.read_json(url)
+PARK_DATA = ('https://raw.githubusercontent.com/ztoms/Park-Visitation-Dashboard/main/data/parks_poi-part1.csv')
+PARK_PATTERNS_DATA = "https://raw.githubusercontent.com/ztoms/Park-Visitation-Dashboard/main/data/parks_patterns-part1.csv"
 
-PARK_DATA = ('https://raw.githubusercontent.com/ztoms/ztoms.github.io/master/parks_poi-part1.csv')
-PARK_PATTERNS_DATA = "https://raw.githubusercontent.com/ztoms/ztoms.github.io/master/parks_patterns-part1.csv"
+@st.cache
+def park_patterns_df():
+    return pd.read_csv(PARK_PATTERNS_DATA)
+
+@st.cache
+def park_poi_df():
+    return pd.read_csv(PARK_DATA).set_index('location_name')
+
+
+poi_df = park_poi_df()
 
 try:
+    parks = st.multiselect("Choose park", list(poi_df.index))
     ALL_LAYERS = {
         "Park Locations": pdk.Layer(
             "ScatterplotLayer",
