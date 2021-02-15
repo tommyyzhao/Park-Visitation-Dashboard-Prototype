@@ -28,15 +28,15 @@ try:
     type = st.sidebar.selectbox('Type', ["By Week","By Month"])
     time_range = st.sidebar.slider('Time Range', min_value=0, max_value=50)
 
-    data = pd.read_csv(PARK_PATTERNS_DATA)
+    data = park_patterns_df
 
     #data['date_range_start'] = data['date_range_start'].astype('|S')
     #data.dtypes
-
-    selected_year = data[data['date_range_start'].str.contains(year)]
+    #selected_year = data[data['date_range_start'].str.contains(year)]
+    #data = data[['date_range_start', 'lng', 'lat', 'raw_visitor_counts']]
     #st.line_chart(data)
 
-    data = data[['date_range_start', 'lng', 'lat', 'raw_visitor_counts']]
+
 
     ALL_LAYERS = {
         "Park Locations": pdk.Layer(
@@ -86,7 +86,7 @@ try:
         ))
     else:
         st.error("Please choose at least one layer above.")
-        
+
 except urllib.error.URLError as e:
     st.error("""
         **This demo requires internet access.**
