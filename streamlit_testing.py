@@ -22,6 +22,22 @@ poi_df = park_poi_df()
 
 try:
     parks = st.multiselect("Choose park", list(poi_df.index))
+
+    st.sidebar.markdown('### Time Filters')
+    year = st.sidebar.selectbox('Year', ["2018","2019","2020"])
+    type = st.sidebar.selectbox('Type', ["By Week","By Month"])
+    time_range = st.sidebar.slider('Time Range', min_value=0, max_value=50)
+
+    data = park_patterns_df
+
+    #data['date_range_start'] = data['date_range_start'].astype('|S')
+    #data.dtypes
+    #selected_year = data[data['date_range_start'].str.contains(year)]
+    #data = data[['date_range_start', 'lng', 'lat', 'raw_visitor_counts']]
+    #st.line_chart(data)
+
+
+    parks = st.multiselect("Choose park", list(poi_df.index))
     ALL_LAYERS = {
         "Park Locations": pdk.Layer(
             "ScatterplotLayer",
